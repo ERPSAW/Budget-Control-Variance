@@ -137,13 +137,12 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Budget": {
+		"on_update_after_submit": "budget_control.events.budget.on_update_after_submit",
+		"validate": "budget_control.events.budget.validate",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -242,3 +241,7 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+import erpnext.accounts.doctype.budget.budget
+from budget_control.override.budget import validate_expense_against_budget as custom_validate_budget_records
+
+erpnext.accounts.doctype.budget.budget.validate_expense_against_budget = custom_validate_budget_records
