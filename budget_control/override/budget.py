@@ -36,7 +36,7 @@ class CustomBudget(Budget):
 def check_budget_amount(doc):
     if doc.custom_total_amount > 0:
         if doc.custom_apply_all_expense_account:
-            account_list = frappe.get_all("Account", {"company": doc.company, "report_type": "Profit and Loss", "is_group": 0}, pluck="name")
+            account_list = frappe.db.get_all("Account", {"company": doc.company, "report_type": "Profit and Loss", "is_group": 0}, pluck="name")
         else:
             account_list = frappe.db.get_all("Budget Account", {"parent": doc.name}, pluck="account")
 
@@ -195,7 +195,7 @@ def validate_budget_records(args, budget_records, expense_amount):
 		# If custom_total_amount is set then check for apply_all_expense_account then fetch all expense account
 		if budget.custom_total_amount:
 			if budget.custom_apply_all_expense_account:
-				account_list = frappe.get_all("Account", {"company": args.company, "report_type": "Profit and Loss", "is_group": 0}, pluck="name")
+				account_list = frappe.db.get_all("Account", {"company": args.company, "report_type": "Profit and Loss", "is_group": 0}, pluck="name")
 			else:
 				account_list = frappe.db.get_all("Budget Account", {"parent": budget.name}, pluck="account")
 
