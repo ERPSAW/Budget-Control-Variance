@@ -129,20 +129,21 @@ app_license = "mit"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+	"Budget": "budget_control.override.budget.CustomBudget",
+}
 
 # Document Events
 # ---------------
 # Hook on document methods and events
 
-doc_events = {
-	"Budget": {
-		"on_update_after_submit": "budget_control.events.budget.on_update_after_submit",
-		"validate": "budget_control.events.budget.validate",
-	}
-}
+# doc_events = {
+# 	"*": {
+# 		"on_update": "method",
+# 		"on_cancel": "method",
+# 		"on_trash": "method"
+# 	}
+# }
 
 # Scheduled Tasks
 # ---------------
