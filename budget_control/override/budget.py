@@ -37,7 +37,6 @@ def check_budget_amount(doc):
 	if doc.custom_total_amount > 0:
 		if doc.custom_apply_all_expense_account:
 			account_list = frappe.db.get_all("Account", {"company": doc.company, "report_type": "Profit and Loss", "is_group": 0}, pluck="name")
-			frappe.log_error("Account List", str(account_list))
 		else:
 			account_list = frappe.db.get_all("Budget Account", {"parent": doc.name}, pluck="account")
 
@@ -196,7 +195,14 @@ def validate_budget_records(args, budget_records, expense_amount):
 		# If custom_total_amount is set then check for apply_all_expense_account then fetch all expense account
 		if budget.custom_total_amount:
 			if budget.custom_apply_all_expense_account:
-				account_list = frappe.db.get_all("Account", {"company": args.company, "report_type": "Profit and Loss", "is_group": 0}, pluck="name")
+				account_list = frappe.db.get_all("Account", 
+						{
+							"company": args.company, 
+							"report_type": "Profit and Loss", 
+							"is_group": 0, 
+							"root_type": "Expense",
+							"account_type": ("not in", ("Cost of Goods Sold", "Stock Adjustment", "Expense Included In Stock Valuation", "Expense Included In Asset Valuation"))
+						}, pluck="name")
 			else:
 				account_list = frappe.db.get_all("Budget Account", {"parent": budget.name}, pluck="account")
 
@@ -315,9 +321,7 @@ def get_requested_amount(args):
 		as_list=1,
 	)
 	# -------- Customization Part END ---------
-	frappe.log_error("Args", str(args))
-	frappe.log_error("MR Condition", str(condition))
-	frappe.log_error("MR Data", str(data))
+
 	return data[0][0] if data else 0
 
 
@@ -335,9 +339,7 @@ def get_ordered_amount(args):
 		as_list=1,
 	)
 	# -------- Customization Part END ---------
-	frappe.log_error("Args", str(args))
-	frappe.log_error("PO Condition", str(condition))
-	frappe.log_error("PO Data", str(data))
+
 	return data[0][0] if data else 0
 
 
@@ -405,9 +407,7 @@ def get_actual_expense(args):
 		)[0][0]
 	)  # nosec
 	# -------- Customization Part END ---------
-	frappe.log_error("GL Data", str(amount))
-	frappe.log_error("GL Args", str(args))
-	frappe.log_error("GL Condition", str(condition1) + '\n\n\n\n' + str(condition2))
+
 	return amount
 
 
