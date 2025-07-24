@@ -36,7 +36,14 @@ class CustomBudget(Budget):
 def check_budget_amount(doc):
 	if doc.custom_total_amount > 0:
 		if doc.custom_apply_all_expense_account:
-			account_list = frappe.db.get_all("Account", {"company": doc.company, "report_type": "Profit and Loss", "is_group": 0}, pluck="name")
+			account_list = frappe.db.get_all("Account", 
+				{
+					"company": args.company, 
+					"report_type": "Profit and Loss", 
+					"is_group": 0, 
+					"root_type": "Expense",
+					"account_type": ("not in", ("Cost of Goods Sold", "Stock Adjustment", "Expense Included In Stock Valuation", "Expense Included In Asset Valuation"))
+				}, pluck="name")
 		else:
 			account_list = frappe.db.get_all("Budget Account", {"parent": doc.name}, pluck="account")
 
