@@ -35,7 +35,7 @@
    "insert_after": "custom_total_amount",
    "is_system_generated": 0,
    "is_virtual": 0,
-   "label": "Apply All Expense Account",
+   "label": "Apply to all Budget Accounts",
    "length": 0,
    "link_filters": null,
    "mandatory_depends_on": null,
