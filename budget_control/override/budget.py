@@ -38,7 +38,7 @@ def check_budget_amount(doc):
 		if doc.custom_apply_all_expense_account:
 			account_list = frappe.db.get_all("Account", 
 				{
-					"company": args.company, 
+					"company": doc.company, 
 					"report_type": "Profit and Loss", 
 					"is_group": 0, 
 					"root_type": "Expense",
