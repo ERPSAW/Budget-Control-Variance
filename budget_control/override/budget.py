@@ -21,8 +21,8 @@ from erpnext.accounts.doctype.budget.budget import (
 """
 
 class CustomBudget(Budget):
-	def validate(self):
-		super().validate()
+	def on_submit(self):
+		super().on_submit()
 		if self.custom_total_amount < 0:
 			frappe.throw(_("The total amount cannot be negative"))
 
@@ -45,7 +45,10 @@ def check_budget_amount(doc):
 					"account_type": ("not in", ("Cost of Goods Sold", "Stock Adjustment", "Expense Included In Stock Valuation", "Expense Included In Asset Valuation"))
 				}, pluck="name")
 		else:
-			account_list = frappe.db.get_all("Budget Account", {"parent": doc.name}, pluck="account")
+			account_list = [d.account for d in doc.accounts]
+
+		if account_list == []:
+			frappe.throw(_("Please select at least one expense account"))
 
 		args = frappe._dict({
 			"account_list": account_list,
