@@ -1,4 +1,8 @@
 import erpnext.accounts.doctype.budget.budget as budget_module
+import erpnext.accounts.general_ledger as general_ledger
+import erpnext.controllers.buying_controller as buying_controller
 from budget_control.override.budget import validate_expense_against_budget as custom_validate_budget_records
 
 budget_module.validate_expense_against_budget = custom_validate_budget_records
+general_ledger.validate_expense_against_budget = custom_validate_budget_records
+buying_controller.validate_expense_against_budget = custom_validate_budget_records
