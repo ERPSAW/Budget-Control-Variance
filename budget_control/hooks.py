@@ -242,7 +242,4 @@ override_doctype_class = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
-import erpnext.accounts.doctype.budget.budget
-from budget_control.override.budget import validate_expense_against_budget as custom_validate_budget_records
-
-erpnext.accounts.doctype.budget.budget.validate_expense_against_budget = custom_validate_budget_records
+from . import monkey_patches
