@@ -22,7 +22,6 @@ from erpnext.accounts.doctype.budget.budget import (
 
 class CustomBudget(Budget):
 	def on_submit(self):
-		super().on_submit()
 		if self.custom_total_amount < 0:
 			frappe.throw(_("The total amount cannot be negative"))
 
