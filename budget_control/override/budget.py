@@ -363,14 +363,17 @@ def get_other_condition(args, for_doc):
 	if budget_against_field and args.get(budget_against_field):
 		condition += f" and child.{budget_against_field} = '{args.get(budget_against_field)}'"
 
+	date_field = "schedule_date" if for_doc == "Material Request" else "transaction_date"
 	if args.get("fiscal_year"):
-		date_field = "schedule_date" if for_doc == "Material Request" else "transaction_date"
 		start_date, end_date = frappe.get_cached_value(
 			"Fiscal Year", args.get("fiscal_year"), ["year_start_date", "year_end_date"]
 		)
 
 		condition += f""" and parent.{date_field}
 			between '{start_date}' and '{end_date}' """
+	else:
+		condition += f""" and parent.{date_field}
+			between '{args.from_date}' and '{args.to_date}' """
 
 	return condition
 

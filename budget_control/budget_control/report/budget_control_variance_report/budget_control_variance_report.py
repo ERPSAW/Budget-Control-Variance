@@ -4,13 +4,13 @@
 
 
 import datetime
-
+import calendar
 import frappe
 from frappe import _
 from frappe.utils import flt, formatdate
 
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
-
+from budget_control.override.budget import get_requested_amount, get_ordered_amount
 
 def execute(filters=None):
 	if not filters:
@@ -371,6 +371,10 @@ def get_dimension_account_month_map(filters):
 		actual_details = get_actual_details(ccd.budget_against, filters)
 		amount_available_flag = False
 
+		budget_doc = frappe.get_doc("Budget", {
+			filters.budget_against.lower().replace(" ", "_"): ccd.budget_against
+		})
+
 		for month_id in range(1, 13):
 			month = datetime.date(2013, month_id, 1).strftime("%B")
 			cam_map.setdefault(ccd.budget_against, {}).setdefault(ccd.account, {}).setdefault(
@@ -395,13 +399,60 @@ def get_dimension_account_month_map(filters):
 					tav_dict.actual += flt(ad.debit) - flt(ad.credit)
 					if tav_dict.actual > 0:
 						amount_available_flag = True
-			
+
+			start, end = get_month_date_range(ccd.fiscal_year, month)
+
+			budget_doc_args = frappe._dict({
+				"account_list": [ccd.account],
+				"budget_against_field": filters.budget_against.lower().replace(" ", "_"),
+				filters.budget_against.lower().replace(" ", "_"): ccd.budget_against,
+				"from_date": start,
+				"to_date": end
+			})
+
+			if budget_doc.applicable_on_purchase_order:
+				tav_dict.actual += get_ordered_amount(budget_doc_args)
+
+			if budget_doc.applicable_on_material_request:
+				tav_dict.actual += get_requested_amount(budget_doc_args)
+
+			if tav_dict.actual > 0 and budget_doc.custom_apply_all_expense_account:
+				amount_available_flag = True
+
 		if not amount_available_flag and cam_map[ccd.budget_against][ccd.account]['total_amount_flag'] == True:
 			cam_map[ccd.budget_against][ccd.account]["remove_account"] = True
 		else:
 			cam_map[ccd.budget_against][ccd.account]["remove_account"] = False
 
 	return cam_map
+
+
+def get_month_date_range(fiscal_year, month_name):
+    # Get fiscal year start & end
+    fy_start, fy_end = frappe.get_cached_value(
+        "Fiscal Year",
+        fiscal_year,
+        ["year_start_date", "year_end_date"]
+    )
+
+    # Convert month name → month number
+    month_num = datetime.datetime.strptime(month_name, "%B").month
+
+    # Determine the correct year for the month
+    # Example: Fiscal Year 2025–2026 → April 2025 to March 2026
+    if month_num >= fy_start.month:
+        year = fy_start.year
+    else:
+        year = fy_end.year
+
+    # First day of month
+    month_start = datetime.datetime(year, month_num, 1)
+
+    # Last day of month
+    last_day = calendar.monthrange(year, month_num)[1]
+    month_end = datetime.datetime(year, month_num, last_day)
+
+    return month_start.date(), month_end.date()
 
 
 def get_fiscal_years(filters):
