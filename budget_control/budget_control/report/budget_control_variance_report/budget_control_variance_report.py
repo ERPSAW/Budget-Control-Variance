@@ -235,13 +235,13 @@ def get_dimension_target_details(filters):
 	budget_filters = {
 		"docstatus": 1,
 		"fiscal_year": filters.from_fiscal_year,
-		"budget_against": budget_against,
+		"budget_against": filters.get("budget_against"),
 		"company": filters.company,
 	}
 
 	if filters.get("budget_against_filter"):
-		budget_filters[filters.get("budget_against")] = ['in', filters.get("budget_against_filter")]
-
+		budget_filters[budget_against] = ['in', filters.get("budget_against_filter")]
+	print(budget_filters, "======")
 	budget_list = frappe.db.get_list("Budget", budget_filters, pluck="name")
 
 	result = []
@@ -517,4 +517,6 @@ def get_chart_data(filters, columns, data):
 			],
 		},
 		"type": "bar",
+		"options": "Currency",
+		"fieldtype": "Currency",
 	}
