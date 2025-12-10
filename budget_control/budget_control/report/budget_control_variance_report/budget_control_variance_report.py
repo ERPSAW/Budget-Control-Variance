@@ -241,7 +241,7 @@ def get_dimension_target_details(filters):
 
 	if filters.get("budget_against_filter"):
 		budget_filters[budget_against] = ['in', filters.get("budget_against_filter")]
-	print(budget_filters, "======")
+
 	budget_list = frappe.db.get_list("Budget", budget_filters, pluck="name")
 
 	result = []
@@ -275,7 +275,7 @@ def get_dimension_target_details(filters):
 				data['total_amount_flag'] = False
 			result.append(data.copy())
 
-	return result
+	return result, account_list
 
 
 # Get target distribution details of accounts of cost center
@@ -305,7 +305,7 @@ def get_target_distribution_details(filters):
 
 
 # Get actual details from gl entry
-def get_actual_details(name, filters):
+def get_actual_details(name, filters, account_list):
 	budget_against = frappe.scrub(filters.get("budget_against"))
 	cond = ""
 
@@ -332,7 +332,7 @@ def get_actual_details(name, filters):
 			where
 				b.name = ba.parent
 				and b.docstatus = 1
-				and ba.account=gl.account
+				and gl.account in {tuple(account_list)}
 				and b.{budget_against} = gl.{budget_against}
 				and gl.fiscal_year between %s and %s
 				and gl.is_cancelled = 0
@@ -362,13 +362,13 @@ def get_actual_details(name, filters):
 
 
 def get_dimension_account_month_map(filters):
-	dimension_target_details = get_dimension_target_details(filters)
+	dimension_target_details, account_list = get_dimension_target_details(filters)
 	tdd = get_target_distribution_details(filters)
 
 	cam_map = {}
 
 	for ccd in dimension_target_details:
-		actual_details = get_actual_details(ccd.budget_against, filters)
+		actual_details = get_actual_details(ccd.budget_against, filters, account_list)
 		amount_available_flag = False
 
 		budget_doc = frappe.get_doc("Budget", {
