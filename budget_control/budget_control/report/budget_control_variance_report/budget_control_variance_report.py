@@ -332,7 +332,7 @@ def get_actual_details(name, filters, account_list):
 			where
 				b.name = ba.parent
 				and b.docstatus = 1
-				and gl.account in {tuple(account_list)}
+				and gl.account in {tuple(account_list) if len(account_list) > 1 else "('" + account_list[0] + "')"}
 				and b.{budget_against} = gl.{budget_against}
 				and gl.fiscal_year between %s and %s
 				and gl.is_cancelled = 0
