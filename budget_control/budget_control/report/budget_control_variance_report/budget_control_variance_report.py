@@ -270,12 +270,13 @@ def get_dimension_target_details(filters):
 
 		for account in account_list:
 			data["account"] = account
+			data["account_list"] = account_list
 			if not budget_doc.custom_total_amount > 0:
 				data["budget_amount"] = frappe.db.get_value("Budget Account", {"parent": budget, "account": account}, "budget_amount")
 				data['total_amount_flag'] = False
 			result.append(data.copy())
 
-	return result, account_list
+	return result
 
 
 # Get target distribution details of accounts of cost center
@@ -362,13 +363,13 @@ def get_actual_details(name, filters, account_list):
 
 
 def get_dimension_account_month_map(filters):
-	dimension_target_details, account_list = get_dimension_target_details(filters)
+	dimension_target_details = get_dimension_target_details(filters)
 	tdd = get_target_distribution_details(filters)
 
 	cam_map = {}
 
 	for ccd in dimension_target_details:
-		actual_details = get_actual_details(ccd.budget_against, filters, account_list)
+		actual_details = get_actual_details(ccd.budget_against, filters, ccd.account_list)
 		amount_available_flag = False
 
 		budget_doc = frappe.get_doc("Budget", {
